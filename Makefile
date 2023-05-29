@@ -13,12 +13,10 @@ up:
 	$(DOCKER_WORKER1) sh -c 'docker swarm join --token $$(cat /swarm/token) manager1:2377'
 	sleep 1
 	$(DOCKER_WORKER2) sh -c 'docker swarm join --token $$(cat /swarm/token) manager1:2377'
-	$(DOCKER_MANAGER) docker node ls
-	$(DOCKER_MANAGER) docker service create --name backend --replicas 2 --publish 8080:80 nginxdemos/hello:plain-text
-	$(DOCKER_MANAGER) docker service ps backend
 	$(DOCKER_MANAGER) docker run -it -d -p 8081:8080 -v /var/run/docker.sock:/var/run/docker.sock dockersamples/visualizer
+	$(DOCKER_MANAGER) docker service create --name backend --replicas 2 --publish 8080:80 nginxdemos/hello:plain-text
 
-# `watch make service` in a seperate window
+# `watch make watch` in a seperate window
 watch: curl
 	docker ps
 	$(DOCKER_MANAGER) docker node ls
@@ -33,16 +31,8 @@ curl:
 %_down:
 	docker pause $$(basename $@ _down)
 
-scale_0:
-	$(DOCKER_MANAGER) docker service scale backend=0
-scale_1:
-	$(DOCKER_MANAGER) docker service scale backend=1
-scale_2:
-	$(DOCKER_MANAGER) docker service scale backend=2
-scale_3:
-	$(DOCKER_MANAGER) docker service scale backend=3
-scale_4:
-	$(DOCKER_MANAGER) docker service scale backend=4
+scale_%:
+	$(DOCKER_MANAGER) docker service scale backend=$$(echo $@ |cut -d_ -f2)
 
 rebalance:
 	$(DOCKER_MANAGER) docker service update --force backend
