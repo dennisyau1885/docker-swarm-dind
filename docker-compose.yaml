@@ -1,0 +1,33 @@
+version: '3.9'
+services:
+    manager1:
+        privileged: true
+        network_mode: my-swarm-net-1
+        hostname: manager1
+        container_name: manager1
+        image: docker:dind
+        volumes:
+          - "./swarm:/swarm"
+        ports:
+          - 8081:8081 # swarm visualizer in a browser
+          - 8080:8080 # nginx/hello, curl/browse
+    worker1:
+        privileged: true
+        network_mode: my-swarm-net-1
+        hostname: worker1
+        container_name: worker1
+        image: docker:dind
+        volumes:
+          - "./swarm:/swarm"
+        depends_on:
+          - manager1
+    worker2:
+        privileged: true
+        network_mode: my-swarm-net-1
+        hostname: worker2
+        container_name: worker2
+        image: docker:dind
+        volumes:
+          - "./swarm:/swarm"
+        depends_on:
+          - manager1
