@@ -23,8 +23,11 @@ watch: curl
 	$(DOCKER_MANAGER) docker service ps backend
 
 curl:
-	@curl --max-time 1 -s localhost:8080 |grep address >>/tmp/curl.$$
-	@sort /tmp/curl.$$ |uniq -c
+	@curl --max-time 1 -s localhost:8080 |grep address >>/tmp/curl.stats.$$
+	@sort /tmp/curl.stats.$$ |uniq -c
+
+rm_stats:
+	rm /tmp/curl.stats.$$
 
 # {worker1,worker2,manager1}_{up,down}
 %_up:
@@ -34,10 +37,11 @@ curl:
 
 scale_%:
 	$(DOCKER_MANAGER) docker service scale backend=$$(echo $@ |cut -d_ -f2)
-	rm /tmp/curl.$$
+	rm /tmp/curl.stats.$$
 
 rebalance:
 	$(DOCKER_MANAGER) docker service update --force backend
+	rm /tmp/curl.stats.$$
 
 down:
 	docker compose down
