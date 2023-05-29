@@ -23,7 +23,7 @@ watch: curl
 	$(DOCKER_MANAGER) docker service ps backend
 
 curl:
-	curl -s localhost:8080 |grep name
+	curl --max-time 1 -s localhost:8080 |grep name
 
 # {worker1,worker2,manager1}_{up,down}
 %_up:
